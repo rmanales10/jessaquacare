@@ -1,3 +1,6 @@
+import 'dart:convert';
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gwapo/home/fish_controller.dart';
@@ -12,9 +15,6 @@ class ScheduledActivitiesPage extends StatefulWidget {
 }
 
 class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
-  final List<String> feedTimes = ["7:00 am", "8:00 am", "6:00 pm"];
-  final List<String> deletedFeedTimes = [];
-  String selectedWaterChange = "2 weeks"; // Default value
   final _controller = Get.put(FishController());
   final fishType = TextEditingController();
   final foodType = TextEditingController();
@@ -57,12 +57,19 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
               Obx(() {
                 _controller.getSpecificFishData(widget.fishId);
                 final fish = _controller.specificFishData;
-
                 fishType.text = fish['fishType'] ?? 'Default';
                 foodType.text = fish['foodType'] ?? 'Default';
                 fishSize.text = fish['foodType'] ?? 'Default';
                 fishTemperature.text = fish['waterTemperature'] ?? 'Default';
-
+                final List feedTimes = fish['feedTimes'] ?? [];
+                final List<String> deletedFeedTimes = [];
+                String selectedWaterChange = fish['changeWater'] ?? 'Default';
+                Uint8List decodedImageBytes;
+                if (fish['imageUrl'] != null) {
+                  decodedImageBytes = base64Decode(fish['imageUrl']);
+                } else {
+                  decodedImageBytes = Uint8List.fromList([]);
+                }
                 return Container(
                   decoration: BoxDecoration(
                     color: const Color(0xFF1E1E1E),
@@ -89,12 +96,13 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                             child: Padding(
                               padding: const EdgeInsets.symmetric(vertical: 20),
                               child: SizedBox(
-                                height: 150,
+                                width: 120,
                                 child: ClipRRect(
                                   borderRadius: BorderRadius.circular(12),
-                                  child: Image.asset(
-                                    'assets/fishda.png',
+                                  child: Image.memory(
+                                    decodedImageBytes,
                                     fit: BoxFit.cover,
+                                    gaplessPlayback: true,
                                   ),
                                 ),
                               ),
@@ -168,6 +176,8 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                                         setState(() {
                                           feedTimes.remove(time);
                                           deletedFeedTimes.add(time);
+                                          _controller.deletedFeedTimes(
+                                              widget.fishId, feedTimes);
                                         });
                                       },
                                       child: Container(
@@ -192,15 +202,28 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                           ),
 
                           // Add Feed Time Button
-                          if (deletedFeedTimes.isNotEmpty)
+                          if (feedTimes.length != 3)
                             GestureDetector(
                               onTap: () {
                                 setState(() {
-                                  if (deletedFeedTimes.isNotEmpty) {
-                                    final restoredTime =
-                                        deletedFeedTimes.removeLast();
-                                    feedTimes.add(restoredTime);
+                                  // Define the list of feed times
+                                  final List feedTimeList = [
+                                    '9:00 AM',
+                                    '7:00 AM',
+                                    '6:00 PM',
+                                  ];
+
+                                  // Find the first missing time from feedTimeList and add it to feedTimes
+                                  for (var time in feedTimeList) {
+                                    if (!feedTimes.contains(time)) {
+                                      feedTimes.add(time);
+                                      break; // Exit the loop after adding one time
+                                    }
                                   }
+
+                                  // Update the controller with the modified feedTimes list
+                                  _controller.deletedFeedTimes(
+                                      widget.fishId, feedTimes);
                                 });
                               },
                               child: Container(
@@ -247,7 +270,7 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                               underline: const SizedBox(),
                               icon: const Icon(Icons.arrow_drop_down,
                                   color: Colors.white),
-                              items: ["1 week", "2 weeks", "3 weeks", "4 weeks"]
+                              items: ["1 Week", "2 Weeks", "3 Weeks", "4 Weeks"]
                                   .map((duration) => DropdownMenuItem(
                                         value: duration,
                                         child: Text(duration),

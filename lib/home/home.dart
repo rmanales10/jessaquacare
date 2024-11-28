@@ -16,7 +16,6 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String selectedCategory = "All"; // Default value for dropdown
   final _controller = Get.put(FishController());
-  int _fishSize = 0;
 
   @override
   Widget build(BuildContext context) {
@@ -141,13 +140,6 @@ class _HomePageState extends State<HomePage> {
                         onChanged: (value) {
                           setState(() {
                             selectedCategory = value!;
-                            selectedCategory == "All"
-                                ? _fishSize = 100
-                                : selectedCategory == "Small"
-                                    ? _fishSize = 5
-                                    : selectedCategory == "Medium"
-                                        ? _fishSize = 15
-                                        : _fishSize = 100;
                           });
                         },
                       ),
@@ -198,7 +190,9 @@ class _HomePageState extends State<HomePage> {
   // Fish Card Widget
   Widget fishCard(String name, Uint8List imagePath, String fishId) {
     return GestureDetector(
-      onTap: () {},
+      onTap: () => Get.to(() => ScheduledActivitiesPage(
+            fishId: fishId,
+          )),
       child: Container(
         decoration: BoxDecoration(
           gradient: const LinearGradient(

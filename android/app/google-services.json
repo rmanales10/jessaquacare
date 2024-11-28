@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "623546761262",
+    "project_id": "aquacare-1ce87",
+    "storage_bucket": "aquacare-1ce87.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:623546761262:android:b2c39d354acdfade6edfbf",
+        "android_client_info": {
+          "package_name": "com.example.aquacare"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCr4LxJgF74gV-_lbV-4GB-GfsmeK3T7Z0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

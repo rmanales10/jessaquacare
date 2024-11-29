@@ -4,7 +4,10 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gwapo/home/fish_controller.dart';
+import 'package:gwapo/home/home.dart';
+import 'package:gwapo/home/navigation.dart';
 
+// ignore: must_be_immutable
 class ScheduledActivitiesPage extends StatefulWidget {
   String fishId;
   ScheduledActivitiesPage({super.key, required this.fishId});
@@ -23,6 +26,12 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
 
   @override
   Widget build(BuildContext context) {
+    _controller.getSpecificFishData(widget.fishId);
+    final fish = _controller.specificFishData;
+    fishType.text = fish['fishType'] ?? 'Default';
+    foodType.text = fish['foodType'] ?? 'Default';
+    fishSize.text = fish['foodType'] ?? 'Default';
+    fishTemperature.text = fish['waterTemperature'] ?? 'Default';
     return Scaffold(
       backgroundColor: Colors.black,
       body: SingleChildScrollView(
@@ -57,10 +66,6 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
               Obx(() {
                 _controller.getSpecificFishData(widget.fishId);
                 final fish = _controller.specificFishData;
-                fishType.text = fish['fishType'] ?? 'Default';
-                foodType.text = fish['foodType'] ?? 'Default';
-                fishSize.text = fish['foodType'] ?? 'Default';
-                fishTemperature.text = fish['waterTemperature'] ?? 'Default';
                 final List feedTimes = fish['feedTimes'] ?? [];
                 final List<String> deletedFeedTimes = [];
                 String selectedWaterChange = fish['changeWater'] ?? 'Default';
@@ -278,7 +283,8 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                                   .toList(),
                               onChanged: (value) {
                                 setState(() {
-                                  selectedWaterChange = value!;
+                                  _controller.updateWater(
+                                      widget.fishId, value!);
                                 });
                               },
                             ),
@@ -292,8 +298,36 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                         children: [
                           Expanded(
                             child: GestureDetector(
-                              onTap: () {
-                                // Delete functionality
+                              onTap: () async {
+                                Get.dialog(AlertDialog(
+                                  backgroundColor: Colors.red.withOpacity(.6),
+                                  title: const Text('Confirm',
+                                      style: TextStyle(color: Colors.white)),
+                                  content: const Text(
+                                      'Are you sure you want to delete this ?',
+                                      style: TextStyle(color: Colors.white)),
+                                  actions: [
+                                    OutlinedButton(
+                                        onPressed: () async {
+                                          await _controller
+                                              .deleteActivities(widget.fishId);
+                                          Get.off(() => const Navigation());
+                                          Get.snackbar('Success',
+                                              'Scheduled deleted successfully!');
+                                        },
+                                        child: const Text(
+                                          'Confirm',
+                                          style: TextStyle(color: Colors.white),
+                                        )),
+                                    ElevatedButton(
+                                        onPressed: () async {
+                                          return Get.back();
+                                        },
+                                        child: const Text(
+                                          'Back',
+                                        )),
+                                  ],
+                                ));
                               },
                               child: Container(
                                 padding:
@@ -324,8 +358,17 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                           const SizedBox(width: 16),
                           Expanded(
                             child: GestureDetector(
-                              onTap: () {
-                                // Save functionality
+                              onTap: () async {
+                                await _controller.updateFish(
+                                  widget.fishId,
+                                  fishType.text,
+                                  fishSize.text,
+                                  foodType.text,
+                                  fishTemperature.text,
+                                );
+                                Get.back();
+                                Get.snackbar('Success',
+                                    'Scheduled activities saved successfully!');
                               },
                               child: Container(
                                 padding:
@@ -379,8 +422,8 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
         controller: controller,
         cursorColor: const Color.fromARGB(255, 219, 21, 7),
         style: const TextStyle(color: Colors.white),
-        decoration: InputDecoration(
-          hintStyle: const TextStyle(color: Colors.white54),
+        decoration: const InputDecoration(
+          hintStyle: TextStyle(color: Colors.white54),
           border: InputBorder.none,
         ),
       ),

@@ -4,9 +4,9 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 
 import 'package:gwapo/home/home.dart';
-import 'package:gwapo/home/view_fish.dart';
+
 import 'package:gwapo/notification/notif.dart';
-import 'package:gwapo/auth_screens/forgot.dart';
+
 import 'package:gwapo/onboarding/page1.dart';
 import 'package:gwapo/onboarding/page2.dart';
 import 'package:gwapo/onboarding/page3.dart';
@@ -14,7 +14,6 @@ import 'package:gwapo/auth_screens/login/signin.dart';
 
 import 'package:gwapo/profile/about.dart';
 import 'package:gwapo/profile/profile.dart';
-import 'package:gwapo/profile/profile_settings.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -41,7 +40,7 @@ class MyApp extends StatelessWidget {
       initialRoute: '/',
       routes: {
         '/': (context) => const LoadingScreen(),
-        '/onboard1': (context) => Onboarding1(),
+        '/onboard1': (context) => const Onboarding1(),
         '/onboard2': (context) => const Onboarding2(),
         '/signin': (context) => const SignInScreen(),
         // '/forgot': (context) => const ForgotPasswordPage(),

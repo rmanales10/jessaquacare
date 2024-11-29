@@ -22,7 +22,8 @@ class _NavigationState extends State<Navigation> {
       body: body[_currentIndex],
       floatingActionButtonLocation: FloatingActionButtonLocation.centerDocked,
       floatingActionButton: FloatingActionButton(
-        onPressed: () => Get.to(() => FishAdd()),
+        onPressed: () => Get.to(() => const FishAdd()),
+        backgroundColor: Colors.black12,
         child: Container(
           padding: EdgeInsets.all(10),
           decoration: BoxDecoration(
@@ -35,7 +36,6 @@ class _NavigationState extends State<Navigation> {
             color: Colors.white,
           ),
         ),
-        backgroundColor: Colors.black12,
       ),
       bottomNavigationBar: BottomNavigationBar(
         backgroundColor: Colors.black,

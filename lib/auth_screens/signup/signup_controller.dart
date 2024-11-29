@@ -73,7 +73,7 @@ class SignupController extends GetxController {
 
       Get.snackbar("Success",
           "User registered successfully! Check your email for verification.");
-      Get.offAll(() => SignInScreen());
+      Get.offAll(() => const SignInScreen());
     } catch (e) {
       Get.snackbar("Error", e.toString());
     }

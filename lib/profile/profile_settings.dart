@@ -9,7 +9,7 @@ import 'package:gwapo/profile/profile_controller.dart';
 import 'package:image_picker/image_picker.dart';
 
 class ProfileSettingsPage extends StatefulWidget {
-  ProfileSettingsPage({super.key});
+  const ProfileSettingsPage({super.key});
 
   @override
   State<ProfileSettingsPage> createState() => _ProfileSettingsPageState();
@@ -38,10 +38,10 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
             _controller.getUserInfo();
             final Map<String, dynamic> profile = _controller.userInfo;
             // Decode the base64 image from the user info
-            Uint8List? _imageBytess;
+            Uint8List? imageBytess;
             try {
               if (profile['image'] != null) {
-                _imageBytess = base64Decode(profile['image']);
+                imageBytess = base64Decode(profile['image']);
               }
             } catch (e) {
               log('Error $e');
@@ -84,7 +84,7 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                     CircleAvatar(
                       radius: 50,
                       backgroundColor: Colors.grey,
-                      backgroundImage: _getImage(_imageBytess),
+                      backgroundImage: _getImage(imageBytess),
                     ),
                     Positioned(
                       bottom: 0,

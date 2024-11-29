@@ -53,11 +53,11 @@ class _HomePageState extends State<HomePage> {
                       return Row(
                         children: [
                           Padding(
-                            padding: EdgeInsets.only(left: 10),
+                            padding: const EdgeInsets.only(left: 10),
                             child: Column(
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
-                                Text(
+                                const Text(
                                   "Hello",
                                   style: TextStyle(
                                       color: Colors.white70, fontSize: 14),
@@ -65,7 +65,7 @@ class _HomePageState extends State<HomePage> {
                                 Text(
                                   _controller.userInfo['username'] ??
                                       'Default User',
-                                  style: TextStyle(
+                                  style: const TextStyle(
                                     color: Colors.white,
                                     fontWeight: FontWeight.bold,
                                     fontSize: 16,

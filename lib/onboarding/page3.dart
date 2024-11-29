@@ -73,7 +73,7 @@ class _Onboarding1State extends State<Onboarding2> {
                       // Sign in button
                       Expanded(
                         child: GestureDetector(
-                          onTap: () => Get.offAll(() => SignInScreen()),
+                          onTap: () => Get.offAll(() => const SignInScreen()),
                           child: Container(
                             padding: const EdgeInsets.symmetric(vertical: 16),
                             decoration: BoxDecoration(

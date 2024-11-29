@@ -196,14 +196,17 @@ class _FishAddState extends State<FishAdd> {
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Column(
                   children: [
-                    buildInputField("Type Of Fish", _fishTypeController),
-                    const SizedBox(height: 16),
-                    buildInputField("Size", _sizeController),
-                    const SizedBox(height: 16),
-                    buildInputField("Type of Food", _foodTypeController),
+                    buildInputField("Type Of Fish", _fishTypeController,
+                        TextInputType.text),
                     const SizedBox(height: 16),
                     buildInputField(
-                        "Water Temperature (°C)", _waterTemperatureController),
+                        "Size", _sizeController, TextInputType.number),
+                    const SizedBox(height: 16),
+                    buildInputField("Type of Food", _foodTypeController,
+                        TextInputType.text),
+                    const SizedBox(height: 16),
+                    buildInputField("Water Temperature (°C)",
+                        _waterTemperatureController, TextInputType.number),
                     const SizedBox(height: 16),
 
                     // Feed Time Checkboxes
@@ -342,7 +345,8 @@ class _FishAddState extends State<FishAdd> {
   }
 
   // Widget to build input fields
-  Widget buildInputField(String label, TextEditingController controller) {
+  Widget buildInputField(
+      String label, TextEditingController controller, TextInputType inputype) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -355,6 +359,7 @@ class _FishAddState extends State<FishAdd> {
         ),
         const SizedBox(height: 8),
         TextFormField(
+          keyboardType: inputype,
           cursorColor: const Color.fromARGB(255, 219, 21, 7),
           controller: controller,
           style: const TextStyle(color: Colors.white),

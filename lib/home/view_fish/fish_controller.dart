@@ -11,25 +11,55 @@ class FishController extends GetxController {
   User? get currentUser => _auth.currentUser;
 
   RxList<Map<String, dynamic>> fishData = <Map<String, dynamic>>[].obs;
-  Future<void> getFishData() async {
-    QuerySnapshot querySnapshot = await _firestore
-        .collection('users')
-        .doc(currentUser!.uid)
-        .collection('activities')
-        .get();
-    fishData.value = querySnapshot.docs
-        .map((doc) => {
-              'changeWater': doc['changeWater'],
-              'createdAt': doc['createdAt'],
-              'feedTimes': doc['feedTimes'],
-              'fishType': doc['fishType'],
-              'fish_id': doc['fish_id'],
-              'foodType': doc['foodType'],
-              'imageUrl': doc['imageUrl'],
-              'size': doc['size'],
-              'waterTemperature': doc['waterTemperature'],
-            })
-        .toList();
+  Future<void> getFishData({required String size}) async {
+    if (!size.contains('All')) {
+      if (size.contains('Medium')) {
+        size = 'Medium: 6 - 15 cm';
+      } else if (size.contains('Small')) {
+        size = 'Small: 0 - 5 cm';
+      } else {
+        size = 'Large: 16 cm above';
+      }
+
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('users')
+          .doc(currentUser!.uid)
+          .collection('activities')
+          .where('size', isEqualTo: size)
+          .get();
+      fishData.value = querySnapshot.docs
+          .map((doc) => {
+                'changeWater': doc['changeWater'],
+                'createdAt': doc['createdAt'],
+                'feedTimes': doc['feedTimes'],
+                'fishType': doc['fishType'],
+                'fish_id': doc['fish_id'],
+                'foodType': doc['foodType'],
+                'imageUrl': doc['imageUrl'],
+                'size': doc['size'],
+                'waterTemperature': doc['waterTemperature'],
+              })
+          .toList();
+    } else {
+      QuerySnapshot querySnapshot = await _firestore
+          .collection('users')
+          .doc(currentUser!.uid)
+          .collection('activities')
+          .get();
+      fishData.value = querySnapshot.docs
+          .map((doc) => {
+                'changeWater': doc['changeWater'],
+                'createdAt': doc['createdAt'],
+                'feedTimes': doc['feedTimes'],
+                'fishType': doc['fishType'],
+                'fish_id': doc['fish_id'],
+                'foodType': doc['foodType'],
+                'imageUrl': doc['imageUrl'],
+                'size': doc['size'],
+                'waterTemperature': doc['waterTemperature'],
+              })
+          .toList();
+    }
   }
 
   RxMap<String, dynamic> specificFishData = <String, dynamic>{}.obs;
@@ -81,7 +111,7 @@ class FishController extends GetxController {
   }
 
   Future<void> updateFish(String fishId, String fishType, String size,
-      String foodType, String waterTemperature) async {
+      String foodType, String waterTemperature, String changeWater) async {
     try {
       await _firestore
           .collection('users')
@@ -93,6 +123,7 @@ class FishController extends GetxController {
         'size': size,
         'foodType': foodType,
         'waterTemperature': waterTemperature,
+        'changeWater': changeWater,
       }, SetOptions(merge: true));
     } catch (t) {
       log('Error $t');

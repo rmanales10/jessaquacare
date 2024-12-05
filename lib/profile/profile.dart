@@ -1,10 +1,19 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
+import 'package:gwapo/auth_screens/login/signin.dart';
+import 'package:gwapo/profile/profile_controller.dart';
 import 'package:gwapo/profile/profile_settings.dart';
 
-class ProfilePage extends StatelessWidget {
-  const ProfilePage({super.key});
+class ProfilePage extends StatefulWidget {
+  ProfilePage({super.key});
+
+  @override
+  State<ProfilePage> createState() => _ProfilePageState();
+}
+
+class _ProfilePageState extends State<ProfilePage> {
+  final _controller = Get.put(ProfileController());
 
   @override
   Widget build(BuildContext context) {
@@ -74,45 +83,35 @@ class ProfilePage extends StatelessWidget {
       ),
     );
   }
-}
 
-void _showLogoutConfirmationDialog(BuildContext context) {
-  showDialog(
-    context: context,
-    builder: (BuildContext context) {
-      return AlertDialog(
-        title: const Text("Logout"),
-        content: const Text("Are you sure you want to log out?"),
-        actions: <Widget>[
-          TextButton(
-            onPressed: () {
-              Navigator.of(context).pop(); // Dismiss the dialog
-            },
-            child: const Text("Cancel", style: TextStyle(color: Colors.black)),
-          ),
-          TextButton(
-            onPressed: () async {
-              // Perform logout operation
-              try {
-                await FirebaseAuth.instance.signOut();
+  void _showLogoutConfirmationDialog(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text("Logout"),
+          content: const Text("Are you sure you want to log out?"),
+          actions: <Widget>[
+            TextButton(
+              onPressed: () {
                 Navigator.of(context).pop(); // Dismiss the dialog
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(
-                      content: Text("You have logged out successfully!")),
-                );
-                // Navigate to SignIn screen or any other screen
-                Navigator.pushReplacementNamed(context, '/signin');
-              } catch (e) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(content: Text("Error: ${e.toString()}")),
-                );
-              }
-            },
-            child: const Text("Logout",
-                style: TextStyle(color: Color(0xFFFF0000))),
-          ),
-        ],
-      );
-    },
-  );
+              },
+              child:
+                  const Text("Cancel", style: TextStyle(color: Colors.black)),
+            ),
+            TextButton(
+              onPressed: () async {
+                await _controller.signOut();
+                Get.offAll(() => const SignInScreen());
+                Get.snackbar('Sucess', '"You have logged out successfully!"',
+                    colorText: Colors.white);
+              },
+              child: const Text("Logout",
+                  style: TextStyle(color: Color(0xFFFF0000))),
+            ),
+          ],
+        );
+      },
+    );
+  }
 }

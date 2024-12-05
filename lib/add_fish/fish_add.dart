@@ -1,13 +1,10 @@
-import 'dart:io';
-import 'dart:math' as math;
-import 'package:firebase_auth/firebase_auth.dart';
-import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'dart:convert';
-import 'dart:developer';
-import 'package:flutter/foundation.dart';
+
+import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:image_picker/image_picker.dart';
+import 'package:gwapo/add_fish/fish_add_controller.dart';
+import 'package:gwapo/notification/notification_service.dart';
+import 'package:intl/intl.dart';
 
 class FishAdd extends StatefulWidget {
   const FishAdd({super.key});
@@ -17,142 +14,11 @@ class FishAdd extends StatefulWidget {
 }
 
 class _FishAddState extends State<FishAdd> {
-  // Controllers for input fields
-  final TextEditingController _fishTypeController = TextEditingController();
-  final TextEditingController _sizeController = TextEditingController();
-  final TextEditingController _foodTypeController = TextEditingController();
-  final TextEditingController _waterTemperatureController =
-      TextEditingController();
-
-  String? base64Image;
-  Uint8List? _imageBytes;
-
-  // Selected feed times
-  List<String> selectedFeedTimes = [];
-  String selectedChangeWater = "1 Week"; // Default value for Change Water
-
-  bool _isSaving = false; // State to manage save button
-
-  final CollectionReference activities =
-      FirebaseFirestore.instance.collection('users');
-  final _auth = FirebaseAuth.instance;
-  User? get user => _auth.currentUser;
-
-  // Save activity data to Firestore
-  Future<void> _saveActivity() async {
-    if (_fishTypeController.text.isEmpty ||
-        _sizeController.text.isEmpty ||
-        _foodTypeController.text.isEmpty ||
-        _waterTemperatureController.text.isEmpty ||
-        selectedFeedTimes.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Please fill in all fields.")),
-      );
-      return;
-    }
-
-    setState(() {
-      _isSaving = true;
-    });
-
-    String generateFishId() {
-      final timestamp = DateTime.now().millisecondsSinceEpoch.toString();
-      final random = math.Random().nextInt(1000).toString().padLeft(3, '0');
-      return 'fish-$timestamp$random';
-    }
-
-    String fishId = generateFishId();
-
-    try {
-      // Save data to Firestore
-      await activities.doc(user!.uid).collection('activities').doc(fishId).set({
-        'fish_id': fishId,
-        'fishType': _fishTypeController.text.trim(),
-        'size': _sizeController.text.trim(),
-        'foodType': _foodTypeController.text.trim(),
-        'waterTemperature': _waterTemperatureController.text.trim(),
-        'feedTimes': selectedFeedTimes,
-        'changeWater': selectedChangeWater,
-        'createdAt': FieldValue.serverTimestamp(),
-        'imageUrl': base64Image, // Store base64 image for now
-      }, SetOptions(merge: true));
-      Get.back();
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text("Activity saved successfully!")),
-      );
-
-      // Clear fields after saving
-      setState(() {
-        _fishTypeController.clear();
-        _sizeController.clear();
-        _foodTypeController.clear();
-        _waterTemperatureController.clear();
-        selectedFeedTimes.clear();
-        selectedChangeWater = "1 Week";
-        base64Image = null; // Reset image data
-      });
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Error saving activity: ${e.toString()}")),
-      );
-    } finally {
-      setState(() {
-        _isSaving = false;
-      });
-    }
-  }
-
-  Future<void> pickImageAndProcess() async {
-    final ImagePicker picker = ImagePicker();
-
-    try {
-      // Pick an image from gallery
-      final XFile? pickedFile =
-          await picker.pickImage(source: ImageSource.gallery);
-
-      if (pickedFile != null) {
-        // Check if the platform is Web
-        if (kIsWeb) {
-          // Web: Use 'readAsBytes' to process the picked image
-          final Uint8List webImageBytes = await pickedFile.readAsBytes();
-
-          setState(() {
-            _imageBytes = webImageBytes;
-            base64Image =
-                base64Encode(webImageBytes); // Store base64 image if needed
-          });
-
-          log("Image selected on Web: ${webImageBytes.lengthInBytes} bytes");
-        } else {
-          // Native (Android/iOS): Use File to get image bytes
-          final File nativeImageFile = File(pickedFile.path);
-
-          // Ensure that the file exists
-          if (await nativeImageFile.exists()) {
-            final Uint8List nativeImageBytes =
-                await nativeImageFile.readAsBytes();
-
-            setState(() {
-              _imageBytes = nativeImageBytes;
-              base64Image = base64Encode(
-                  nativeImageBytes); // Store base64 image if needed
-            });
-
-            log("Image selected on Native: ${nativeImageFile.path}");
-          } else {
-            log("File does not exist: ${pickedFile.path}");
-          }
-        }
-      } else {
-        log("No image selected.");
-      }
-    } catch (e) {
-      log("Error picking image: $e");
-    }
-  }
-
   @override
   Widget build(BuildContext context) {
+    final FishAddController controller = Get.put(FishAddController());
+    final NotificationService _notificationService = NotificationService();
+
     return Scaffold(
       backgroundColor: Colors.black,
       body: SingleChildScrollView(
@@ -162,8 +28,6 @@ class _FishAddState extends State<FishAdd> {
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
               const SizedBox(height: 10),
-
-              // Back Button
               Row(
                 mainAxisAlignment: MainAxisAlignment.start,
                 children: [
@@ -176,7 +40,7 @@ class _FishAddState extends State<FishAdd> {
                 ],
               ),
               const Text(
-                "Schedule Your Activities",
+                "Add Fish Activity",
                 style: TextStyle(
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
@@ -185,8 +49,6 @@ class _FishAddState extends State<FishAdd> {
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 30),
-
-              // Input Fields
               Container(
                 decoration: BoxDecoration(
                   color: const Color(0xFF1E1E1E),
@@ -196,143 +58,161 @@ class _FishAddState extends State<FishAdd> {
                     const EdgeInsets.symmetric(horizontal: 20, vertical: 20),
                 child: Column(
                   children: [
-                    buildInputField("Type Of Fish", _fishTypeController,
-                        TextInputType.text),
+                    buildInputField("Type of Fish",
+                        controller.fishTypeController, TextInputType.text),
                     const SizedBox(height: 16),
-                    buildInputField(
-                        "Size", _sizeController, TextInputType.number),
-                    const SizedBox(height: 16),
-                    buildInputField("Type of Food", _foodTypeController,
-                        TextInputType.text),
-                    const SizedBox(height: 16),
-                    buildInputField("Water Temperature (°C)",
-                        _waterTemperatureController, TextInputType.number),
-                    const SizedBox(height: 16),
-
-                    // Feed Time Checkboxes
                     const Align(
-                      alignment: Alignment.centerLeft,
+                      alignment: Alignment.topLeft,
                       child: Text(
-                        "Feed Time",
+                        'Size',
                         style: TextStyle(
                           color: Colors.white,
                           fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
-                    Row(
-                      children: [
-                        Expanded(child: buildCheckbox("7:00 AM")),
-                        Expanded(child: buildCheckbox("9:00 AM")),
-                        Expanded(child: buildCheckbox("6:00 PM")),
-                      ],
-                    ),
                     const SizedBox(height: 5),
+                    _buildDropdDownSize(controller),
+                    const SizedBox(height: 16),
+                    buildInputField("Type of Food",
+                        controller.foodTypeController, TextInputType.text),
+                    const SizedBox(height: 16),
+                    buildInputField(
+                        "Water Temperature (°C)",
+                        controller.waterTemperatureController,
+                        TextInputType.number),
+                    const SizedBox(height: 16),
+                    const Align(
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        "Feed Times",
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                        ),
+                      ),
+                    ),
+                    Obx(() {
+                      return Column(
+                        children: controller.feedTimes.map((time) {
+                          return Padding(
+                            padding: const EdgeInsets.only(bottom: 16),
+                            child: Row(
+                              children: [
+                                Expanded(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 12, vertical: 16),
+                                    decoration: BoxDecoration(
+                                      color: const Color(0xFF1E1E1E),
+                                      borderRadius: BorderRadius.circular(12),
+                                      border: Border.all(
+                                        color: Colors.white70,
+                                        width: 1,
+                                      ),
+                                    ),
+                                    child: Text(
+                                      time,
+                                      style:
+                                          const TextStyle(color: Colors.white),
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                GestureDetector(
+                                  onTap: () {
+                                    controller.removeFeedTime(time);
+                                  },
+                                  child: Container(
+                                    padding: const EdgeInsets.all(10),
+                                    decoration: BoxDecoration(
+                                      border: Border.all(color: Colors.white),
+                                      borderRadius: BorderRadius.circular(10),
+                                    ),
+                                    child: const Icon(
+                                      Icons.delete,
+                                      color: Color.fromARGB(255, 219, 21, 7),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          );
+                        }).toList(),
+                      );
+                    }),
+                    GestureDetector(
+                      onTap: () async {
+                        TimeOfDay? pickedTime = await showTimePicker(
+                          context: context,
+                          initialTime: TimeOfDay.now(),
+                        );
 
-                    // Change Water Dropdown
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        const Text(
-                          "Change Water",
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                        const SizedBox(height: 8),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
+                        if (pickedTime != null) {
+                          DateTime now = DateTime.now();
+                          DateTime scheduledTime = DateTime(
+                            now.year,
+                            now.month,
+                            now.day,
+                            pickedTime.hour,
+                            pickedTime.minute,
+                          );
+
+                          if (scheduledTime.isBefore(now)) {
+                            scheduledTime =
+                                scheduledTime.add(const Duration(days: 1));
+                          }
+
+                          String formattedTime =
+                              DateFormat('hh:mm a').format(scheduledTime);
+
+                          setState(() {
+                            controller.addFeedTime(
+                                formattedTime); // Add the feed time to the list
+
+                            // Schedule the notification for the added feed time
+                            _notificationService.scheduleAlarm(
+                              controller.feedTimes
+                                  .length, // Unique ID for each notification
+                              'Feed Fish', // Notification title
+                              'It\'s time to feed your fish!', // Notification body
+                              scheduledTime, // Scheduled time
+                            );
+                          });
+
+                          Get.snackbar(
+                            'Notification Scheduled',
+                            'Alarm set for $formattedTime',
+                          );
+                        }
+                      },
+                      child: Align(
+                        alignment: Alignment.topLeft,
+                        child: Container(
+                          margin: const EdgeInsets.only(top: 12),
+                          padding: const EdgeInsets.all(10),
                           decoration: BoxDecoration(
-                            color: const Color(0xFF1E1E1E),
-                            borderRadius: BorderRadius.circular(12),
-                            border: Border.all(color: Colors.white70, width: 1),
+                            border: Border.all(color: Colors.white),
+                            borderRadius: BorderRadius.circular(10),
                           ),
-                          child: DropdownButton<String>(
-                            value: selectedChangeWater,
-                            dropdownColor: const Color(0xFF1E1E1E),
-                            isExpanded: true,
-                            style: const TextStyle(color: Colors.white),
-                            underline: const SizedBox(),
-                            icon: const Icon(Icons.arrow_drop_down,
-                                color: Colors.white),
-                            items: ["1 Week", "2 Weeks", "3 Weeks", "4 Weeks"]
-                                .map((duration) => DropdownMenuItem(
-                                      value: duration,
-                                      child: Text(duration),
-                                    ))
-                                .toList(),
-                            onChanged: (value) {
-                              setState(() {
-                                selectedChangeWater = value!;
-                              });
-                            },
-                          ),
+                          child: const Icon(Icons.add, color: Colors.white),
                         ),
-                      ],
+                      ),
                     ),
                     const SizedBox(height: 16),
-
-                    // Image Upload Section
+                    _buildSelectdate(context, controller.dateController),
+                    const SizedBox(height: 20),
+                    const SizedBox(height: 16),
                     GestureDetector(
-                      onTap: pickImageAndProcess,
-                      child: Container(
-                        height: 100,
-                        decoration: BoxDecoration(
-                          color: const Color(0xFF1E1E1E),
-                          borderRadius: BorderRadius.circular(12),
-                          border: Border.all(color: Colors.white, width: 1),
-                        ),
-                        child: base64Image == null
-                            ? const Center(
-                                child: Column(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    Icon(Icons.add_photo_alternate,
-                                        color: Colors.white70, size: 32),
-                                    SizedBox(height: 8),
-                                    Text(
-                                      "Click To Upload Photo",
-                                      style: TextStyle(color: Colors.white70),
-                                    ),
-                                  ],
-                                ),
-                              )
-                            : Image.memory(
-                                _imageBytes!,
-                                fit: BoxFit.cover,
-                              ),
-                      ),
+                      onTap: () => controller.pickImageAndProcess(),
+                      child: buildImageUploadBox(controller),
                     ),
                     const SizedBox(height: 30),
-
-                    // Save Button
                     GestureDetector(
-                      onTap: _isSaving ? null : _saveActivity,
-                      child: Container(
-                        width: double.infinity,
-                        padding: const EdgeInsets.symmetric(vertical: 16),
-                        decoration: BoxDecoration(
-                          borderRadius: BorderRadius.circular(50),
-                          gradient: const LinearGradient(
-                            colors: [
-                              Color(0xFFFF0000),
-                              Color.fromARGB(255, 73, 1, 1)
-                            ],
-                            begin: Alignment.topLeft,
-                            end: Alignment.bottomRight,
-                          ),
-                        ),
-                        child: Center(
-                          child: Text(
-                            _isSaving ? "Saving..." : "Save",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
-                        ),
-                      ),
+                      onTap: () => controller.isSaving.value
+                          ? null
+                          : controller.saveActivity(),
+                      child: buildSaveButton(controller),
                     ),
                   ],
                 ),
@@ -344,9 +224,78 @@ class _FishAddState extends State<FishAdd> {
     );
   }
 
-  // Widget to build input fields
+  Widget _buildSelectdate(
+      BuildContext context, TextEditingController controller) {
+    return Column(
+      children: [
+        const Align(
+          alignment: Alignment.topLeft,
+          child: Text(
+            'Change Water',
+            style: TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+        const SizedBox(height: 5),
+        TextField(
+          controller: controller,
+          style: const TextStyle(color: Colors.white),
+          readOnly: true,
+          decoration: InputDecoration(
+            hintText: 'Select dates',
+            hintStyle: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+            filled: true,
+            fillColor: const Color(0xFF1E1E1E),
+            suffixIcon: const Icon(
+              Icons.calendar_today,
+              color: Colors.white,
+            ),
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.white70),
+            ),
+            enabledBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(color: Colors.white70),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(12),
+              borderSide: const BorderSide(
+                color: Color.fromARGB(255, 219, 21, 7),
+              ),
+            ),
+          ),
+          onTap: () {
+            // When tapped, open the date picker
+            _selectDate(context, controller);
+          },
+        ),
+      ],
+    );
+  }
+
+  Future<void> _selectDate(
+      BuildContext context, TextEditingController controller) async {
+    DateTime today = DateTime.now();
+    DateTime? selectedDate = await showDatePicker(
+      context: context,
+      initialDate: today,
+      firstDate: DateTime(2000),
+      lastDate: DateTime(2101),
+    );
+
+    if (selectedDate != null) {
+      controller.text = "${selectedDate.toLocal()}".split(' ')[0];
+    }
+  }
+
   Widget buildInputField(
-      String label, TextEditingController controller, TextInputType inputype) {
+      String label, TextEditingController controller, TextInputType inputType) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
@@ -359,7 +308,7 @@ class _FishAddState extends State<FishAdd> {
         ),
         const SizedBox(height: 8),
         TextFormField(
-          keyboardType: inputype,
+          keyboardType: inputType,
           cursorColor: const Color.fromARGB(255, 219, 21, 7),
           controller: controller,
           style: const TextStyle(color: Colors.white),
@@ -386,26 +335,93 @@ class _FishAddState extends State<FishAdd> {
     );
   }
 
-  // Widget to build checkboxes
-  Widget buildCheckbox(String label) {
-    return Row(
-      children: [
-        Checkbox(
-          value: selectedFeedTimes.contains(label),
-          onChanged: (bool? value) {
-            setState(() {
-              if (value == true) {
-                selectedFeedTimes.add(label);
-              } else {
-                selectedFeedTimes.remove(label);
-              }
-            });
-          },
-          activeColor: const Color.fromARGB(255, 219, 21, 7),
-          checkColor: Colors.white,
+  Widget _buildDropdDownSize(FishAddController controller) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12),
+      decoration: BoxDecoration(
+        color: const Color(0xFF1E1E1E),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: Colors.white70, width: 1),
+      ),
+      child: DropdownButton<String>(
+        value: controller.selectedSize,
+        dropdownColor: const Color(0xFF1E1E1E),
+        isExpanded: true,
+        hint: const Text(
+          'Select size',
+          style: TextStyle(color: Colors.white),
         ),
-        Text(label, style: const TextStyle(color: Colors.white)),
-      ],
+        style: const TextStyle(color: Colors.white),
+        underline: const SizedBox(),
+        icon: const Icon(Icons.arrow_drop_down, color: Colors.white),
+        items: ["Small: 0 - 5 cm", "Medium: 6 - 15 cm", "Large: 16 cm above"]
+            .map((size) => DropdownMenuItem(
+                  value: size,
+                  child: Text(size),
+                ))
+            .toList(),
+        onChanged: (value) {
+          setState(() {
+            controller.selectedSize = value!;
+          });
+        },
+      ),
     );
+  }
+
+  Widget buildImageUploadBox(FishAddController controller) {
+    return Obx(() {
+      return Container(
+        height: 100,
+        decoration: BoxDecoration(
+          color: const Color(0xFF1E1E1E),
+          borderRadius: BorderRadius.circular(12),
+          border: Border.all(color: Colors.white, width: 1),
+        ),
+        child: controller.base64Image.value == null
+            ? const Center(
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Icon(Icons.add_photo_alternate,
+                        color: Colors.white70, size: 32),
+                    SizedBox(height: 8),
+                    Text("Click To Upload Photo",
+                        style: TextStyle(color: Colors.white70)),
+                  ],
+                ),
+              )
+            : Image.memory(
+                base64Decode(controller.base64Image.value!),
+                fit: BoxFit.cover,
+              ),
+      );
+    });
+  }
+
+  Widget buildSaveButton(FishAddController controller) {
+    return Obx(() {
+      return Container(
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(50),
+          gradient: const LinearGradient(
+            colors: [Color(0xFFFF0000), Color.fromARGB(255, 73, 1, 1)],
+            begin: Alignment.topLeft,
+            end: Alignment.bottomRight,
+          ),
+        ),
+        child: Center(
+          child: Text(
+            controller.isSaving.value ? "Saving..." : "Save",
+            style: const TextStyle(
+              color: Colors.white,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+        ),
+      );
+    });
   }
 }

@@ -3,8 +3,8 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gwapo/home/fish_controller.dart';
-import 'package:gwapo/home/view_fish.dart';
+import 'package:gwapo/home/view_fish/fish_controller.dart';
+import 'package:gwapo/home/view_fish/view_fish.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -50,6 +50,7 @@ class _HomePageState extends State<HomePage> {
                       } else {
                         decodedImageBytes = Uint8List.fromList([]);
                       }
+
                       return Row(
                         children: [
                           Padding(
@@ -75,11 +76,17 @@ class _HomePageState extends State<HomePage> {
                             ),
                           ),
                           const SizedBox(width: 12),
-                          CircleAvatar(
-                            radius: 20,
-                            backgroundImage: MemoryImage(
-                                decodedImageBytes), // Replace with your asset
-                          ),
+                          decodedImageBytes.isEmpty
+                              ? const Center(child: CircularProgressIndicator())
+                              : ClipOval(
+                                  child: Image.memory(
+                                    decodedImageBytes,
+                                    width: 50,
+                                    height: 50,
+                                    gaplessPlayback: true,
+                                    fit: BoxFit.cover,
+                                  ),
+                                )
                         ],
                       );
                     }),
@@ -140,6 +147,7 @@ class _HomePageState extends State<HomePage> {
                         onChanged: (value) {
                           setState(() {
                             selectedCategory = value!;
+                            _controller.getFishData(size: selectedCategory);
                           });
                         },
                       ),
@@ -149,7 +157,6 @@ class _HomePageState extends State<HomePage> {
                   const SizedBox(height: 10),
 
                   Obx(() {
-                    _controller.getFishData();
                     return GridView.builder(
                       shrinkWrap:
                           true, // Important if this is inside a scrollable parent

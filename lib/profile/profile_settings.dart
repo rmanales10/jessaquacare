@@ -81,11 +81,16 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 // Profile Avatar with Edit Icon
                 Stack(
                   children: [
-                    CircleAvatar(
-                      radius: 50,
-                      backgroundColor: Colors.grey,
-                      backgroundImage: _getImage(imageBytess),
-                    ),
+                    ClipOval(
+                        child: imageBytess != null
+                            ? Image.memory(
+                                imageBytess,
+                                height: 110,
+                                width: 110,
+                                fit: BoxFit.cover,
+                                gaplessPlayback: true,
+                              )
+                            : Image.asset('assets/fish.png')),
                     Positioned(
                       bottom: 0,
                       right: 0,
@@ -115,14 +120,6 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                 buildInputField(
                     profile['username'] ?? 'Default', true, _username),
                 const SizedBox(height: 16),
-
-                // Email Field
-                buildInputField(profile['email'] ?? 'Default', false, _email),
-                const SizedBox(height: 16),
-
-                // Password Field
-                buildInputField("********", false, _password, isObscure: true),
-                const SizedBox(height: 32),
 
                 // Save Button
                 GestureDetector(
@@ -251,18 +248,4 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
   }
 
   // Function to load image bytes into ImageProvider
-  ImageProvider<Object> _getImage(Uint8List? imageBytes) {
-    try {
-      if (imageBytes != null && imageBytes.isNotEmpty) {
-        return MemoryImage(imageBytes);
-      } else {
-        // Return a fallback asset image if no image bytes are available
-        return const AssetImage('assets/fish.png');
-      }
-    } catch (e) {
-      // In case of an error, fallback to the asset image
-      log('Error loading image: $e');
-      return const AssetImage('assets/fish.png');
-    }
-  }
 }

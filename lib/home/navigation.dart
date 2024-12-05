@@ -14,7 +14,7 @@ class Navigation extends StatefulWidget {
 
 class _NavigationState extends State<Navigation> {
   int _currentIndex = 0;
-  List<Widget> body = const [HomePage(), ProfilePage()];
+  List<Widget> body = [HomePage(), ProfilePage()];
 
   @override
   Widget build(BuildContext context) {

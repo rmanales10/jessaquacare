@@ -183,6 +183,7 @@ class _FishAddState extends State<FishAdd> {
                           Get.snackbar(
                             'Notification Scheduled',
                             'Alarm set for $formattedTime',
+                            colorText: Colors.white,
                           );
                         }
                       },

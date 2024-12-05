@@ -20,6 +20,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
       appBar: AppBar(
         backgroundColor: Colors.black,
         elevation: 0,
+        foregroundColor: Colors.white,
       ),
       body: SingleChildScrollView(
         child: Padding(

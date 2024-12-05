@@ -247,6 +247,7 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                           Get.snackbar(
                             'Notification Scheduled',
                             'Alarm set for $formattedTime',
+                            colorText: Colors.white,
                           );
                         });
                       }

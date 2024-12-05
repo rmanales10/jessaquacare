@@ -1,13 +1,15 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
     <!-- Required permissions -->
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
     <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
 
+    <!-- Declare the application -->
     <application
         android:label="@string/appName"
-        android:name="${applicationName}" 
+        android:name="${applicationName}"
         android:icon="@mipmap/launcher_icon">
 
         <!-- Main Activity -->
@@ -20,6 +22,7 @@
             android:configChanges="orientation|keyboardHidden|keyboard|screenSize|smallestScreenSize|locale|layoutDirection|fontScale|screenLayout|density|uiMode"
             android:hardwareAccelerated="true"
             android:windowSoftInputMode="adjustResize">
+
             <!-- Specifies an Android theme to apply as soon as the Android process starts -->
             <meta-data
                 android:name="io.flutter.embedding.android.NormalTheme"
@@ -38,17 +41,18 @@
 
         <!-- Receivers for Flutter Local Notifications -->
         <!-- Handles rescheduling notifications after device reboot -->
-        <receiver 
+        <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationBootReceiver"
             android:enabled="true"
             android:exported="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </receiver>
 
         <!-- Handles the delivery of scheduled notifications -->
-        <receiver 
+        <receiver
             android:name="com.dexterous.flutterlocalnotifications.ScheduledNotificationReceiver"
             android:enabled="true"
             android:exported="true" />
@@ -61,11 +65,12 @@
 
     </application>
 
-    <!-- Queries for text processing -->
+    <!-- Queries for text processing (optional) -->
     <queries>
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT" />
             <data android:mimeType="text/plain" />
         </intent>
     </queries>
+
 </manifest>

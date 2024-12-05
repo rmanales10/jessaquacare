@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gwapo/home/view_fish/fish_controller.dart';
 import 'package:gwapo/home/view_fish/view_fish.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
@@ -16,6 +17,14 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String selectedCategory = "All"; // Default value for dropdown
   final _controller = Get.put(FishController());
+
+  @override
+  void initState() {
+    // TODO: implement initState
+    super.initState();
+    requestPermissions();
+    initCat();
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -233,5 +242,46 @@ class _HomePageState extends State<HomePage> {
         ),
       ),
     );
+  }
+
+  Future<void> requestPermissions() async {
+    // Request permissions available in permission_handler
+    final statusWakeLock = await Permission.notification
+        .request(); // Requesting permission for wake lock
+    final statusIgnoreBatteryOptimizations = await Permission
+        .ignoreBatteryOptimizations
+        .request(); // Request battery optimization permission
+    final statusScheduleExactAlarm = await Permission.notification
+        .request(); // Request exact alarm permission
+
+    // Permissions not available in permission_handler like RECEIVE_BOOT_COMPLETED need special handling
+    // For RECEIVE_BOOT_COMPLETED, you can only check if permission is granted by the system
+    // No way to request this permission via Flutter at runtime, so just show feedback to the user if necessary
+
+    if (statusWakeLock.isGranted &&
+        statusIgnoreBatteryOptimizations.isGranted &&
+        statusScheduleExactAlarm.isGranted) {
+      // All permissions granted
+      // showSnackBar('All permissions granted!');
+    } else {
+      // Some permissions were not granted, guide the user to settings if needed
+      // showSnackBar('Some permissions are missing!');
+      openAppSettings();
+    }
+  }
+
+  // Function to show a SnackBar for feedback
+  void showSnackBar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
+  }
+
+  // Function to open app settings for manual permission granting
+  Future<void> openAppSettings() async {
+    await openAppSettings();
+  }
+
+  Future<void> initCat() async {
+    await _controller.getFishData(size: selectedCategory);
   }
 }

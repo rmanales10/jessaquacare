@@ -2,11 +2,19 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gwapo/auth_screens/login/auth_service.dart';
 
-class ForgotPasswordPage extends StatelessWidget {
+class ForgotPasswordPage extends StatefulWidget {
   ForgotPasswordPage({super.key});
 
+  @override
+  State<ForgotPasswordPage> createState() => _ForgotPasswordPageState();
+}
+
+class _ForgotPasswordPageState extends State<ForgotPasswordPage> {
   final AuthService _auth = AuthService();
+
   final email = TextEditingController();
+
+  final isSubmit = false.obs;
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -100,15 +108,15 @@ class ForgotPasswordPage extends StatelessWidget {
                       end: Alignment.bottomRight,
                     ),
                   ),
-                  child: const Center(
-                    child: Text(
-                      "Submit",
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                      ),
-                    ),
+                  child: Center(
+                    child: Obx(() => Text(
+                          isSubmit.value ? 'Submitting...' : "Submit",
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                          ),
+                        )),
                   ),
                 ),
               ),
@@ -120,8 +128,13 @@ class ForgotPasswordPage extends StatelessWidget {
   }
 
   void forgot() async {
+    isSubmit.value = true;
     await _auth.forgotPassword(email.text);
     Get.back();
-    Get.snackbar('Success', 'Please check your email reset link!');
+    Get.snackbar('Success', 'Please check your email reset link!',
+        colorText: Colors.white);
+    if (email.text == '') {
+      isSubmit.value = false;
+    }
   }
 }

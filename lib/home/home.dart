@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gwapo/home/view_fish/fish_controller.dart';
 import 'package:gwapo/home/view_fish/view_fish.dart';
+import 'package:gwapo/notification/notification_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class HomePage extends StatefulWidget {
@@ -17,12 +18,15 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> {
   String selectedCategory = "All"; // Default value for dropdown
   final _controller = Get.put(FishController());
+  final _notificationService = NotificationService();
 
   @override
   void initState() {
     // TODO: implement initState
     super.initState();
     requestPermissions();
+    _notificationService.requestExactAlarmPermission();
+
     initCat();
   }
 
@@ -100,12 +104,12 @@ class _HomePageState extends State<HomePage> {
                       );
                     }),
                   ),
-                  GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, '/notif');
-                      },
-                      child: const Icon(Icons.notifications_outlined,
-                          color: Colors.white)),
+                  // GestureDetector(
+                  //     onTap: () {
+                  //       Navigator.pushNamed(context, '/notif');
+                  //     },
+                  //     child: const Icon(Icons.notifications_outlined,
+                  //         color: Colors.white)),
                 ],
               ),
             ),

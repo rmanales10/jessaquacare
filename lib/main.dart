@@ -25,7 +25,7 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return GetMaterialApp(
-      title: 'AquaCare',
+      title: 'Aqua Care',
       debugShowCheckedModeBanner: false,
       initialRoute: '/',
       routes: {

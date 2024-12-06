@@ -33,17 +33,19 @@ class SignupController extends GetxController {
         email.isEmpty ||
         password.isEmpty ||
         confirmPassword.isEmpty) {
-      Get.snackbar("Error", "All fields are required!");
+      Get.snackbar("Error", "All fields are required!",
+          colorText: Colors.white);
       return;
     }
 
     if (password != confirmPassword) {
-      Get.snackbar("Error", "Passwords do not match!");
+      Get.snackbar("Error", "Passwords do not match!", colorText: Colors.white);
       return;
     }
 
     if (!termsAccepted.value) {
-      Get.snackbar("Error", "You must accept the terms and conditions!");
+      Get.snackbar("Error", "You must accept the terms and conditions!",
+          colorText: Colors.white);
       return;
     }
 
@@ -72,10 +74,11 @@ class SignupController extends GetxController {
       }, SetOptions(merge: true));
 
       Get.snackbar("Success",
-          "User registered successfully! Check your email for verification.");
+          "User registered successfully! Check your email for verification.",
+          colorText: Colors.white);
       Get.offAll(() => const SignInScreen());
     } catch (e) {
-      Get.snackbar("Error", e.toString());
+      Get.snackbar("Error", e.toString(), colorText: Colors.white);
     }
   }
 }

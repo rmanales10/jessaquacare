@@ -14,11 +14,10 @@ class FishAdd extends StatefulWidget {
 }
 
 class _FishAddState extends State<FishAdd> {
+  final FishAddController controller = Get.put(FishAddController());
+  final NotificationService _notificationService = NotificationService();
   @override
   Widget build(BuildContext context) {
-    final FishAddController controller = Get.put(FishAddController());
-    final NotificationService _notificationService = NotificationService();
-
     return Scaffold(
       backgroundColor: Colors.black,
       body: SingleChildScrollView(
@@ -175,7 +174,7 @@ class _FishAddState extends State<FishAdd> {
                               controller.feedTimes
                                   .length, // Unique ID for each notification
                               'Feed Fish', // Notification title
-                              'It\'s time to feed your fish!', // Notification body
+                              'It\'s time to feed your ${controller.fishTypeController.text} fish!', // Notification body
                               scheduledTime, // Scheduled time
                             );
                           });
@@ -226,7 +225,7 @@ class _FishAddState extends State<FishAdd> {
   }
 
   Widget _buildSelectdate(
-      BuildContext context, TextEditingController controller) {
+      BuildContext context, TextEditingController dateController) {
     return Column(
       children: [
         const Align(
@@ -241,7 +240,7 @@ class _FishAddState extends State<FishAdd> {
         ),
         const SizedBox(height: 5),
         TextField(
-          controller: controller,
+          controller: dateController,
           style: const TextStyle(color: Colors.white),
           readOnly: true,
           decoration: InputDecoration(
@@ -271,9 +270,9 @@ class _FishAddState extends State<FishAdd> {
               ),
             ),
           ),
-          onTap: () {
+          onTap: () async {
             // When tapped, open the date picker
-            _selectDate(context, controller);
+            await _selectDate(context, dateController);
           },
         ),
       ],
@@ -281,7 +280,7 @@ class _FishAddState extends State<FishAdd> {
   }
 
   Future<void> _selectDate(
-      BuildContext context, TextEditingController controller) async {
+      BuildContext context, TextEditingController dateController) async {
     DateTime today = DateTime.now();
     DateTime? selectedDate = await showDatePicker(
       context: context,
@@ -291,7 +290,34 @@ class _FishAddState extends State<FishAdd> {
     );
 
     if (selectedDate != null) {
-      controller.text = "${selectedDate.toLocal()}".split(' ')[0];
+      setState(() {
+        dateController.text = "${selectedDate.toLocal()}".split(' ')[0];
+
+        // Schedule a notification for the selected water change date
+        DateTime scheduledTime = DateTime(
+          selectedDate.year,
+          selectedDate.month,
+          selectedDate.day,
+          9, // You can set a specific time, e.g., 9:00 AM
+        );
+
+        if (scheduledTime.isBefore(DateTime.now())) {
+          scheduledTime = scheduledTime.add(const Duration(days: 1));
+        }
+
+        _notificationService.scheduleAlarm(
+          999, // Unique ID for water change notification
+          'Change Water Reminder',
+          'It\'s time to change the water for your fish tank!',
+          scheduledTime,
+        );
+
+        Get.snackbar(
+          'Notification Scheduled',
+          'Water change reminder set for ${DateFormat('yyyy-MM-dd').format(scheduledTime)} at 9:00 AM',
+          colorText: Colors.white,
+        );
+      });
     }
   }
 

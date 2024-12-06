@@ -90,7 +90,13 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                                 fit: BoxFit.cover,
                                 gaplessPlayback: true,
                               )
-                            : Image.asset('assets/fish.png')),
+                            : Image.asset(
+                                'assets/fish.png',
+                                height: 110,
+                                width: 110,
+                                fit: BoxFit.cover,
+                                gaplessPlayback: true,
+                              )),
                     Positioned(
                       bottom: 0,
                       right: 0,
@@ -130,7 +136,8 @@ class _ProfileSettingsPageState extends State<ProfileSettingsPage> {
                             : _username.text,
                         base64Image!);
                     Get.back();
-                    Get.snackbar('Success', 'Profile updated successfully');
+                    Get.snackbar('Success', 'Profile updated successfully',
+                        colorText: Colors.white);
                   },
                   child: Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 50),

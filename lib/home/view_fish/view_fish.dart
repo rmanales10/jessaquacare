@@ -226,7 +226,8 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                         );
 
                         if (scheduledTime.isBefore(now)) {
-                          scheduledTime = scheduledTime.add(Duration(days: 1));
+                          scheduledTime =
+                              scheduledTime.add(const Duration(days: 1));
                         }
 
                         setState(() {
@@ -264,7 +265,7 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                   ),
 
                 const SizedBox(height: 20),
-                _buildSelectdate(context),
+                _buildSelectdate(context, dateController),
                 const SizedBox(height: 20),
                 // Test Notification Button
 
@@ -392,7 +393,8 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
     );
   }
 
-  Widget _buildSelectdate(BuildContext context) {
+  Widget _buildSelectdate(
+      BuildContext context, TextEditingController dateController) {
     return Column(
       children: [
         const Align(
@@ -407,13 +409,14 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
         ),
         const SizedBox(height: 5),
         TextField(
-          enabled: isEdit.value ? true : false,
           controller: dateController,
-          style: TextStyle(color: isEdit.value ? Colors.white : Colors.grey),
+          style: const TextStyle(color: Colors.white),
           readOnly: true,
           decoration: InputDecoration(
+            hintText: 'Select dates',
             hintStyle: const TextStyle(
               color: Colors.white,
+              fontWeight: FontWeight.bold,
             ),
             filled: true,
             fillColor: const Color(0xFF1E1E1E),
@@ -436,16 +439,17 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
               ),
             ),
           ),
-          onTap: () {
+          onTap: () async {
             // When tapped, open the date picker
-            _selectDate(context);
+            await _selectDate(context, dateController);
           },
         ),
       ],
     );
   }
 
-  Future<void> _selectDate(BuildContext context) async {
+  Future<void> _selectDate(
+      BuildContext context, TextEditingController dateController) async {
     DateTime today = DateTime.now();
     DateTime? selectedDate = await showDatePicker(
       context: context,
@@ -455,7 +459,34 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
     );
 
     if (selectedDate != null) {
-      dateController.text = "${selectedDate.toLocal()}".split(' ')[0];
+      setState(() {
+        dateController.text = "${selectedDate.toLocal()}".split(' ')[0];
+
+        // Schedule a notification for the selected water change date
+        DateTime scheduledTime = DateTime(
+          selectedDate.year,
+          selectedDate.month,
+          selectedDate.day,
+          9, // You can set a specific time, e.g., 9:00 AM
+        );
+
+        if (scheduledTime.isBefore(DateTime.now())) {
+          scheduledTime = scheduledTime.add(const Duration(days: 1));
+        }
+
+        _notificationService.scheduleAlarm(
+          999, // Unique ID for water change notification
+          'Change Water Reminder',
+          'It\'s time to change the water for your fish tank!',
+          scheduledTime,
+        );
+
+        Get.snackbar(
+          'Notification Scheduled',
+          'Water change reminder set for ${DateFormat('yyyy-MM-dd').format(scheduledTime)} at 9:00 AM',
+          colorText: Colors.white,
+        );
+      });
     }
   }
 

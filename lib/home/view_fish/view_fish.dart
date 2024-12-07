@@ -241,7 +241,7 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                           _notificationService.scheduleAlarm(
                             feedTimes.length,
                             'Feed Fish',
-                            'It\'s time to feed your fish!',
+                            'It\'s time to feed your ${fishType.text} fish!',
                             scheduledTime,
                           );
 

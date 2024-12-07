@@ -112,8 +112,11 @@ class FishAddController extends GetxController {
 
   void addFeedTime(String time) {
     feedTimes.add(time);
-    _notificationService.scheduleAlarm(feedTimes.length, 'Feed Fish',
-        'It\'s time to feed your fish!', DateTime.now());
+    _notificationService.scheduleAlarm(
+        feedTimes.length,
+        'Feed Fish',
+        'It\'s time to feed your fish! ${fishTypeController.text}',
+        DateTime.now());
   }
 
   void removeFeedTime(String time) {

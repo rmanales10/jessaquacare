@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gwapo/add_fish/fish_add.dart';
+import 'package:gwapo/user/add_fish/fish_add.dart';
 
-import 'package:gwapo/home/home.dart';
-import 'package:gwapo/profile/profile.dart';
+import 'package:gwapo/user/home/home.dart';
+import 'package:gwapo/user/profile/profile.dart';
 
 class Navigation extends StatefulWidget {
   const Navigation({super.key});

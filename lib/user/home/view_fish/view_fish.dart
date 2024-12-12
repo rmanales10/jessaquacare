@@ -2,15 +2,15 @@ import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gwapo/home/navigation.dart';
-import 'package:gwapo/notification/notification_service.dart';
+import 'package:gwapo/user/home/navigation.dart';
+import 'package:gwapo/user/notification/notification_service.dart';
 import 'package:intl/intl.dart';
 import 'fish_controller.dart';
 
 class ScheduledActivitiesPage extends StatefulWidget {
   final String fishId;
 
-  ScheduledActivitiesPage({Key? key, required this.fishId}) : super(key: key);
+  const ScheduledActivitiesPage({super.key, required this.fishId});
 
   @override
   State<ScheduledActivitiesPage> createState() =>
@@ -29,7 +29,6 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
 
   @override
   void initState() {
-    // TODO: implement initState
     super.initState();
     initFishData();
   }
@@ -111,20 +110,24 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                     ),
                     const SizedBox(width: 16),
                     Expanded(
-                        child: Obx(
-                      () => Column(
-                        children: [
-                          buildInputField(fishType, 'Fish Type', isEdit.value),
-                          const SizedBox(height: 16),
-                          _buildDropdDownSize('Fish Size'),
-                          const SizedBox(height: 16),
-                          buildInputField(foodType, 'Food Type', isEdit.value),
-                          const SizedBox(height: 16),
-                          buildInputField(
-                              fishTemperature, 'Temperature', isEdit.value),
-                        ],
-                      ),
-                    )),
+                      child: Obx(() {
+                        _controller.getSpecificFishData(widget.fishId);
+                        return Column(
+                          children: [
+                            buildInputField(
+                                fishType, 'Fish Type', isEdit.value),
+                            const SizedBox(height: 16),
+                            _buildDropdDownSize('Fish Size'),
+                            const SizedBox(height: 16),
+                            buildInputField(
+                                foodType, 'Food Type', isEdit.value),
+                            const SizedBox(height: 16),
+                            buildInputField(
+                                fishTemperature, 'Temperature', isEdit.value),
+                          ],
+                        );
+                      }),
+                    ),
                   ],
                 ),
 
@@ -317,7 +320,7 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
                               foodType.text,
                               fishTemperature.text,
                               dateController.text);
-                          Get.back();
+                          Get.back(closeOverlays: true);
                           Get.snackbar('Success',
                               'Scheduled activities saved successfully!',
                               colorText: Colors.white);
@@ -494,7 +497,7 @@ class _ScheduledActivitiesPageState extends State<ScheduledActivitiesPage> {
     await _controller.getSpecificFishData(widget.fishId);
     final fish = _controller.specificFishData;
     setState(() {
-      fishSize!.value = fish['size'] ?? 'Loading...';
+      fishSize.value = fish['size'] ?? 'Loading...';
       fishTemperature.text = fish['waterTemperature'] ?? 'Loading...';
       foodType.text = fish['foodType'] ?? 'Loading...';
       fishType.text = fish['fishType'] ?? 'Loading...';

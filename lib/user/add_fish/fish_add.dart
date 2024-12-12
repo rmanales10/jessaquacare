@@ -2,8 +2,8 @@ import 'dart:convert';
 
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gwapo/add_fish/fish_add_controller.dart';
-import 'package:gwapo/notification/notification_service.dart';
+import 'package:gwapo/user/add_fish/fish_add_controller.dart';
+import 'package:gwapo/user/notification/notification_service.dart';
 import 'package:intl/intl.dart';
 
 class FishAdd extends StatefulWidget {

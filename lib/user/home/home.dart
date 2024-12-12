@@ -3,9 +3,9 @@ import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gwapo/home/view_fish/fish_controller.dart';
-import 'package:gwapo/home/view_fish/view_fish.dart';
-import 'package:gwapo/notification/notification_service.dart';
+import 'package:gwapo/user/home/view_fish/fish_controller.dart';
+import 'package:gwapo/user/home/view_fish/view_fish.dart';
+import 'package:gwapo/user/notification/notification_service.dart';
 import 'package:permission_handler/permission_handler.dart';
 
 class HomePage extends StatefulWidget {
@@ -32,6 +32,7 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    Size size = MediaQuery.of(context).size;
     return Scaffold(
       backgroundColor: Colors.black,
       body: SingleChildScrollView(
@@ -191,8 +192,8 @@ class _HomePageState extends State<HomePage> {
                         final Uint8List imageBytes =
                             base64Decode(fish['imageUrl']);
 
-                        return fishCard(
-                            fish['fishType'], imageBytes, fish['fish_id']);
+                        return fishCard(fish['fishType'], imageBytes,
+                            fish['fish_id'], size);
                       },
                     );
                   }),
@@ -208,7 +209,7 @@ class _HomePageState extends State<HomePage> {
   }
 
   // Fish Card Widget
-  Widget fishCard(String name, Uint8List imagePath, String fishId) {
+  Widget fishCard(String name, Uint8List imagePath, String fishId, Size size) {
     return GestureDetector(
       onTap: () => Get.to(() => ScheduledActivitiesPage(
             fishId: fishId,
@@ -225,14 +226,17 @@ class _HomePageState extends State<HomePage> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.center,
           children: [
-            SizedBox(
-              height: 100,
-              child: ClipRRect(
-                borderRadius: BorderRadius.circular(12),
-                child: Image.memory(
-                  imagePath,
-                  fit: BoxFit.cover,
-                  gaplessPlayback: true,
+            Center(
+              child: SizedBox(
+                height: size.height * 0.20,
+                width: size.width * 0.25,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(12),
+                  child: Image.memory(
+                    imagePath,
+                    fit: BoxFit.cover,
+                    gaplessPlayback: true,
+                  ),
                 ),
               ),
             ),

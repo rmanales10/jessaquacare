@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gwapo/auth_screens/forgot.dart';
-import 'package:gwapo/auth_screens/signup/signup_screen.dart';
-import 'package:gwapo/home/navigation.dart';
+import 'package:gwapo/user/auth_screens/forgot.dart';
+import 'package:gwapo/user/auth_screens/signup/signup_screen.dart';
+import 'package:gwapo/user/home/navigation.dart';
 import 'auth_service.dart'; // Import your AuthService
 
 class SignInScreen extends StatefulWidget {

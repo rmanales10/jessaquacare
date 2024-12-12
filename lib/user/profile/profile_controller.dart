@@ -4,7 +4,7 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gwapo/auth_screens/login/signin.dart';
+import 'package:gwapo/user/auth_screens/login/signin.dart';
 
 class ProfileController extends GetxController {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -29,9 +29,5 @@ class ProfileController extends GetxController {
       'username': name,
       'image': encodedImage,
     }, SetOptions(merge: true));
-  }
-
-  Future<void> signOut() async {
-    await _auth.signOut();
   }
 }

@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gwapo/auth_screens/login/signin.dart';
-import 'package:gwapo/auth_screens/signup/signup_screen.dart';
+import 'package:gwapo/user/auth_screens/login/signin.dart';
+import 'package:gwapo/user/auth_screens/signup/signup_screen.dart';
 
 class Onboarding2 extends StatefulWidget {
   const Onboarding2({super.key});

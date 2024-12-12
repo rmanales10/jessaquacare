@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gwapo/auth_screens/login/auth_service.dart';
+import 'package:gwapo/user/auth_screens/login/auth_service.dart';
 
 class ForgotPasswordPage extends StatefulWidget {
   ForgotPasswordPage({super.key});

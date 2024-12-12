@@ -1,11 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
-import 'package:gwapo/auth_screens/login/signin.dart';
-import 'package:gwapo/profile/profile_controller.dart';
-import 'package:gwapo/profile/profile_settings.dart';
+import 'package:gwapo/user/auth_screens/login/auth_service.dart';
+import 'package:gwapo/user/auth_screens/login/signin.dart';
+import 'package:gwapo/user/profile/profile_controller.dart';
+import 'package:gwapo/user/profile/profile_settings.dart';
 
 class ProfilePage extends StatefulWidget {
-  ProfilePage({super.key});
+  const ProfilePage({super.key});
 
   @override
   State<ProfilePage> createState() => _ProfilePageState();
@@ -13,6 +14,7 @@ class ProfilePage extends StatefulWidget {
 
 class _ProfilePageState extends State<ProfilePage> {
   final _controller = Get.put(ProfileController());
+  final _auth = Get.put(AuthService());
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +51,7 @@ class _ProfilePageState extends State<ProfilePage> {
               ),
               trailing: const Icon(Icons.arrow_forward_ios_outlined,
                   color: Colors.white),
-              onTap: () => Get.to(() => ProfileSettingsPage()),
+              onTap: () => Get.to(() => const ProfileSettingsPage()),
             ),
             const Divider(color: Colors.white54),
             ListTile(
@@ -100,7 +102,7 @@ class _ProfilePageState extends State<ProfilePage> {
             ),
             TextButton(
               onPressed: () async {
-                await _controller.signOut();
+                await _auth.signOut();
                 Get.offAll(() => const SignInScreen());
                 Get.snackbar('Sucess', '"You have logged out successfully!"',
                     colorText: Colors.white);
